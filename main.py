@@ -73,3 +73,22 @@ for t in range(1, 10):  # 1〜9語を試す
 print("====== 結果 ======")
 print("最適threshold：", best_threshold)
 print("最高accuracy：", best_accuracy)
+
+
+import matplotlib.pyplot as plt
+
+thresholds = list(range(1, 10))
+accuracies = []
+
+for t in thresholds:
+    acc = accuracy(X, y, t)
+    accuracies.append(acc)
+    print(f"threshold={t}, accuracy={acc}")
+
+# グラフ化
+plt.plot(thresholds, accuracies, marker='o')
+plt.title("Threshold vs Accuracy")
+plt.xlabel("Threshold (単語数)")
+plt.ylabel("Accuracy (正解率)")
+plt.grid(True)
+plt.show()
