@@ -42,3 +42,34 @@ prediction = simple_model(test_count)
 
 print("単語数：", test_count)
 print("判定結果：", prediction)
+
+# ===== 正解率を計算する関数 =====
+def accuracy(X, y, threshold):
+    correct = 0
+    total = len(X)
+
+    for word_count, label in zip(X, y):
+        prediction = 1 if word_count > threshold else 0
+        if prediction == label:
+            correct += 1
+    
+    return correct / total
+
+acc = accuracy(X, y, threshold)
+print("正解率：", acc)
+
+# ===== 最適な threshold を探す =====
+best_threshold = None
+best_accuracy = -1
+
+for t in range(1, 10):  # 1〜9語を試す
+    acc = accuracy(X, y, t)
+    print(f"threshold={t}, accuracy={acc}")
+
+    if acc > best_accuracy:
+        best_accuracy = acc
+        best_threshold = t
+
+print("====== 結果 ======")
+print("最適threshold：", best_threshold)
+print("最高accuracy：", best_accuracy)
