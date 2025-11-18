@@ -1,8 +1,4 @@
-# ===== データセット（文章 + ラベル） =====
-# 例："文章", ラベル
-# ラベル 1 → ポジティブ
-# ラベル 0 → ネガティブ
-
+# ===== データセット =====
 dataset = [
     ["I am happy today", 1],
     ["This is a great day", 1],
@@ -12,91 +8,48 @@ dataset = [
     ["I feel bad", 0]
 ]
 
-# ===== 単語数を数える関数 =====
-def count_words(sentence):
-    words = sentence.split()
-    return len(words)
+# ===== ポジネガ単語辞書 =====
+positive_words = ["happy", "great", "amazing", "good", "nice", "love"]
+negative_words = ["sad", "terrible", "bad", "hate", "angry", "awful"]
 
-# ===== データを X（入力）と y（正解）に分ける =====
+# ===== 単語数 =====
+def count_words(sentence):
+    return len(sentence.split())
+
+# ===== ポジネガ単語数 =====
+def count_sentiment_words(sentence):
+    words = sentence.lower().split()
+    pos = sum(1 for w in words if w in positive_words)
+    neg = sum(1 for w in words if w in negative_words)
+    return pos, neg
+
+# ===== 特徴量 X と 正解 y =====
 X = []
 y = []
-
 for text, label in dataset:
-    word_count = count_words(text)
-    X.append(word_count)
+    wc = count_words(text)
+    pos, neg = count_sentiment_words(text)
+    X.append([wc, pos, neg])
     y.append(label)
 
-# ===== 単語AI（閾値で分類するモデル） =====
-threshold = 4  # この境界より多いとポジティブ
+# ===== ルールベースAI =====
+def rule_based_model(features):
+    wc, pos, neg = features
 
-def simple_model(word_count):
-    if word_count > threshold:
-        return 1  # ポジティブ
-    else:
-        return 0  # ネガティブ
+    if pos > neg:
+        return 1
+    if neg > pos:
+        return 0
 
-# ===== 予測テスト =====
-test_sentence = "I feel very happy today"
-test_count = count_words(test_sentence)
-prediction = simple_model(test_count)
+    return 1 if wc > 4 else 0
 
-print("単語数：", test_count)
-print("判定結果：", prediction)
-
-# ===== 正解率を計算する関数 =====
-def accuracy(X, y, threshold):
+def accuracy_rule_based(X, y):
     correct = 0
-    total = len(X)
-
-    for word_count, label in zip(X, y):
-        prediction = 1 if word_count > threshold else 0
-        if prediction == label:
+    for features, label in zip(X, y):
+        if rule_based_model(features) == label:
             correct += 1
-    
-    return correct / total
+    return correct / len(y)
 
-acc = accuracy(X, y, threshold)
-print("正解率：", acc)
-
-# ===== 最適な threshold を探す =====
-best_threshold = None
-best_accuracy = -1
-
-for t in range(1, 10):  # 1〜9語を試す
-    acc = accuracy(X, y, t)
-    print(f"threshold={t}, accuracy={acc}")
-
-    if acc > best_accuracy:
-        best_accuracy = acc
-        best_threshold = t
-
-print("====== 結果 ======")
-print("最適threshold：", best_threshold)
-print("最高accuracy：", best_accuracy)
-
-
-import matplotlib.pyplot as plt
-
-thresholds = list(range(1, 10))
-accuracies = []
-
-for t in thresholds:
-    acc = accuracy(X, y, t)
-    accuracies.append(acc)
-    print(f"threshold={t}, accuracy={acc}")
-
-# グラフ化
-plt.plot(thresholds, accuracies, marker='o')
-plt.title("Threshold vs Accuracy")
-plt.xlabel("Threshold (単語数)")
-plt.ylabel("Accuracy (正解率)")
-plt.grid(True)
-
-# ===== 最適スレッショルドのマーク =====
-plt.scatter(best_threshold, best_accuracy, s=120, color='red')  # 赤い点
-plt.text(best_threshold, best_accuracy,
-         f"  best={best_threshold}",
-         color='red',
-         fontsize=10)
-
-plt.show()
+# ===== 評価 =====
+acc = accuracy_rule_based(X, y)
+print("ルールベースAIの正解率：", acc)
