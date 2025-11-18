@@ -91,4 +91,12 @@ plt.title("Threshold vs Accuracy")
 plt.xlabel("Threshold (単語数)")
 plt.ylabel("Accuracy (正解率)")
 plt.grid(True)
+
+# ===== 最適スレッショルドのマーク =====
+plt.scatter(best_threshold, best_accuracy, s=120, color='red')  # 赤い点
+plt.text(best_threshold, best_accuracy,
+         f"  best={best_threshold}",
+         color='red',
+         fontsize=10)
+
 plt.show()
